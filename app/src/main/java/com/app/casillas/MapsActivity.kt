@@ -33,9 +33,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var ubicacionActual: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+    private lateinit var loadingDialog: LoadingDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
+
+        loadingDialog = LoadingDialog(this)
+        loadingDialog.startLoadingDialog()
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         setUbicacion()
@@ -62,16 +67,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         activarMiUbicacion()
 
         val latLng = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
-        /*val geocoder = Geocoder(this, Locale.getDefault())
-        Thread {
-            val direcciones = geocoder.getFromLocation(ubicacionActual.latitude, ubicacionActual.longitude, 1)
-            if (direcciones.size > 0) {
-                val direccion = direcciones[0].getAddressLine(0)
-            }
-        }.start()*/
 
         //val latLngAux = LatLng(25.7901478, -100.2833808)
-        val latLngAux = LatLng(25.8021768, -100.2769046)
+        val latLngAux = LatLng(25.7422697, -100.3120796)
 
         mMap.addMarker(MarkerOptions().position(latLng).title("Origen"))
         mMap.addMarker(MarkerOptions().position(latLngAux).title("Destino"))
@@ -80,6 +78,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val URL = obtenerDireccionUrl(latLng, latLngAux)
         obtenerDireccion(URL).execute()
+
+        loadingDialog.dismissLoadingDialog()
     }
 
     private fun activarMiUbicacion() {
