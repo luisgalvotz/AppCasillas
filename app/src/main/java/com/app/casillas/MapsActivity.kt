@@ -29,6 +29,9 @@ import kotlin.collections.ArrayList
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    var lat : Double? = null
+    var long : Double? = null
+
     private lateinit var mMap: GoogleMap
     private lateinit var ubicacionActual: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -38,6 +41,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
+
+        val bundle : Bundle? = intent.extras
+        lat = bundle!!.getDouble("LAT")
+        long = bundle.getDouble("LONG")
 
         loadingDialog = LoadingDialog(this)
         loadingDialog.startLoadingDialog()
@@ -66,17 +73,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
         activarMiUbicacion()
 
-        val latLng = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
+        val latLngOrigen = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
 
-        //val latLngAux = LatLng(25.7901478, -100.2833808)
-        val latLngAux = LatLng(25.7422697, -100.3120796)
+        //val latLngDestino = LatLng(25.7422697, -100.3120796)
+        val latLngDestino = LatLng(lat!!, long!!)
 
-        mMap.addMarker(MarkerOptions().position(latLng).title("Origen"))
-        mMap.addMarker(MarkerOptions().position(latLngAux).title("Destino"))
+        mMap.addMarker(MarkerOptions().position(latLngOrigen).title("Origen"))
+        mMap.addMarker(MarkerOptions().position(latLngDestino).title("Destino"))
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngOrigen, 15F))
 
-        val URL = obtenerDireccionUrl(latLng, latLngAux)
+        val URL = obtenerDireccionUrl(latLngOrigen, latLngDestino)
         obtenerDireccion(URL).execute()
 
         loadingDialog.dismissLoadingDialog()
@@ -91,7 +98,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun obtenerDireccionUrl(origen: LatLng, destino: LatLng): String {
-        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyDWXNDTULZTRa4K5YCf7d0N-bCjPJL8H5I"
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyDVn3AI6Pa05G8RpB2cx8qQkMy0kgkU1dg"
     }
 
     @SuppressLint("StaticFieldLeak")
