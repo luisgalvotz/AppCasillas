@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 20-07-2022 a las 17:51:25
+-- Tiempo de generación: 28-07-2022 a las 19:56:13
 -- Versión del servidor: 10.5.15-MariaDB-cll-lve
 -- Versión de PHP: 7.2.34
 
@@ -29,6 +29,15 @@ CREATE DEFINER=`u625118055_user_casillas`@`127.0.0.1` PROCEDURE `SP_ReadLocation
 FROM casillas c 
 	INNER JOIN usuarios u ON u.SECCION = c.ID 
 WHERE u.CVE = T_CVE$$
+
+CREATE DEFINER=`u625118055_user_casillas`@`127.0.0.1` PROCEDURE `SP_RegisterVote` (IN `T_CVE` VARCHAR(18))  INSERT IGNORE INTO votantes 
+(CVE, NOMBRE, PATERNO, MATERNO, SECCION, VOTO) 
+VALUES (T_CVE, 
+        (SELECT NOMBRE FROM usuarios WHERE CVE = T_CVE),
+        (SELECT PATERNO FROM usuarios WHERE CVE = T_CVE),
+        (SELECT MATERNO FROM usuarios WHERE CVE = T_CVE),
+        (SELECT SECCION FROM usuarios WHERE CVE = T_CVE),
+        TRUE)$$
 
 DELIMITER ;
 
@@ -118,6 +127,22 @@ INSERT INTO `usuarios` (`ID`, `CVE`, `NOMBRE`, `PATERNO`, `MATERNO`, `CALLE`, `E
 (1199, 'ABBLLN58110519M700', 'LEONOR', 'ABREGO', 'BALDERAS', 'C IBERIA', '230', '', 66050, 'INFONAVIT TOPO GRANDE', 408, 19, 'M', 'LEONOR ABREGO BALDERAS', 'AEBL581105MNLBLN08'),
 (1201, 'ABBNAD94092119H100', 'ADRIAN', 'ABUNDIZ', 'BANDA', 'C RIO GARONA', '828', '', 66646, 'COL PUEBLO NUEVO 5 SEC', 408, 19, 'H', 'ADRIAN ABUNDIZ BANDA', 'AUBA940921HNLBND02');
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votantes`
+--
+
+CREATE TABLE `votantes` (
+  `ID` int(11) NOT NULL,
+  `CVE` varchar(18) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NOMBRE` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `PATERNO` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `MATERNO` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `SECCION` int(11) NOT NULL,
+  `VOTO` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- Índices para tablas volcadas
 --
@@ -133,6 +158,23 @@ ALTER TABLE `casillas`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`ID`);
+
+--
+-- Indices de la tabla `votantes`
+--
+ALTER TABLE `votantes`
+  ADD PRIMARY KEY (`ID`),
+  ADD UNIQUE KEY `CVE` (`CVE`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `votantes`
+--
+ALTER TABLE `votantes`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

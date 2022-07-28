@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     var lat : Double? = null
     var long : Double? = null
+    var clave : String? = null
 
     private lateinit var btnIngresar : Button
     private lateinit var txtClave : EditText
@@ -39,9 +40,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun buscarCasilla() {
-        val clave = txtClave.text.toString()
+        clave = txtClave.text.toString()
         URL_READLOCATION = "http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave"
-        if (clave.isEmpty()) {
+        if (clave!!.isEmpty()) {
             txtClave.setError("Favor de llenar este campo")
         }
         else {
@@ -99,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(this, MapsActivity::class.java)
                     intent.putExtra("LAT", lat)
                     intent.putExtra("LONG", long)
+                    intent.putExtra("CVE", clave)
                     startActivityForResult(intent, 1)
                 }
 

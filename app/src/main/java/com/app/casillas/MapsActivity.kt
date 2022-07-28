@@ -2,39 +2,43 @@ package com.app.casillas
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Looper
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.lang.Exception
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     var lat : Double? = null
     var long : Double? = null
+    var clave : String? = null
 
     private lateinit var mMap: GoogleMap
     private lateinit var ubicacionActual: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
 
     private lateinit var loadingDialog: LoadingDialog
 
@@ -45,12 +49,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val bundle : Bundle? = intent.extras
         lat = bundle!!.getDouble("LAT")
         long = bundle.getDouble("LONG")
+        clave = bundle.getString("CVE")
 
         loadingDialog = LoadingDialog(this)
         loadingDialog.startLoadingDialog()
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
+        locationRequest = LocationRequest.create().apply {
+            interval = 4000
+            fastestInterval = 2000
+            priority = Priority.PRIORITY_HIGH_ACCURACY
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                if (locationResult == null) {
+                    return
+                }
+                for (location in locationResult.locations) {
+                    //Log.d("MapsActivity", "Location: ${location.toString()}")
+                    Toast.makeText(this@MapsActivity, "Location: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         setUbicacion()
+        settingsAndLocationUpdates()
     }
 
     private fun setUbicacion() {
@@ -74,12 +99,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         activarMiUbicacion()
 
         val latLngOrigen = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
-
-        //val latLngDestino = LatLng(25.7422697, -100.3120796)
         val latLngDestino = LatLng(lat!!, long!!)
+        //val latLngDestino = LatLng(25.7422697, -100.3120796)
 
-        mMap.addMarker(MarkerOptions().position(latLngOrigen).title("Origen"))
-        mMap.addMarker(MarkerOptions().position(latLngDestino).title("Destino"))
+        mMap.addMarker(MarkerOptions().position(latLngOrigen).title("Ubicación actual"))
+        mMap.addMarker(MarkerOptions().position(latLngDestino).title("Casilla"))
+
+        val mCircle = mMap.addCircle(CircleOptions().center(latLngDestino).radius(100.0).fillColor(0x44ff0000).strokeWidth(0F))
+        val distancia = FloatArray(2)
+        Location.distanceBetween(latLngOrigen.latitude, latLngOrigen.longitude, mCircle.center.latitude, mCircle.center.longitude, distancia)
+        if (distancia[0] > mCircle.radius) {
+            Toast.makeText(this, "Fuera, distancia del centro: ${distancia[0]}", Toast.LENGTH_SHORT).show()
+        }
+        else {
+            Toast.makeText(this, "Dentro, distancia del centro: ${distancia[0]}", Toast.LENGTH_SHORT).show()
+        }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngOrigen, 15F))
 
@@ -91,14 +125,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun activarMiUbicacion() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
         mMap.isMyLocationEnabled = true
     }
 
+    override fun onStop() {
+        super.onStop()
+        stopLocationUpdates()
+    }
+
+    private fun settingsAndLocationUpdates() {
+        val request = LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
+        val client = LocationServices.getSettingsClient(this)
+
+        val locationSettingsResponseTask = client.checkLocationSettings(request)
+        locationSettingsResponseTask.addOnSuccessListener {
+            startLocationUpdates()
+        }
+        locationSettingsResponseTask.addOnFailureListener { error ->
+            if (error is ResolvableApiException) {
+                val apiException: ResolvableApiException = error
+                try {
+                    apiException.startResolutionForResult(this, 1001)
+                } catch (ex : IntentSender.SendIntentException) {
+                    ex.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+    }
+
     private fun obtenerDireccionUrl(origen: LatLng, destino: LatLng): String {
-        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyDVn3AI6Pa05G8RpB2cx8qQkMy0kgkU1dg"
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyDWXNDTULZTRa4K5YCf7d0N-bCjPJL8H5I"
     }
 
     @SuppressLint("StaticFieldLeak")
