@@ -36,7 +36,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var clave : String? = null
     var notified : Boolean = false
     var timerOn : Boolean = false
-    var countDownTime : Long = 600000
+    var countDownTime : Long = 300000
 
     val channelID = "AppCasillas"
     val channelName = "AppCasillas"
@@ -89,7 +89,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             override fun onFinish() {
-                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=$clave")
+                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=${clave}")
                 Toast.makeText(this@MapsActivity, "Finalizó", Toast.LENGTH_SHORT).show()
             }
 
@@ -125,7 +125,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             //Fuera del rango
                             if (timerOn) {
                                 notified = false
-                                countDownTime = 600000
+                                countDownTime = 300000
                                 timerOn = false
                                 timer.cancel()
                             }
