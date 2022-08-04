@@ -2,43 +2,52 @@ package com.app.casillas
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import android.os.AsyncTask
-import android.os.Bundle
-import android.os.Looper
-import android.util.Log
+import android.location.LocationManager
+import android.os.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     var lat : Double? = null
     var long : Double? = null
     var clave : String? = null
+    var notified : Boolean = false
+    var timerOn : Boolean = false
+    var countDownTime : Long = 600000
+
+    val channelID = "AppCasillas"
+    val channelName = "AppCasillas"
 
     private lateinit var mMap: GoogleMap
+    private lateinit var mCircle: Circle
     private lateinit var ubicacionActual: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var timer: CountDownTimer
 
     private lateinit var loadingDialog: LoadingDialog
 
@@ -56,6 +65,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
+        if (savedInstanceState != null) {
+            with(savedInstanceState) {
+                val location = Location(LocationManager.NETWORK_PROVIDER)
+                location.latitude = getDouble("Latitud")
+                location.longitude = getDouble("Longitud")
+                ubicacionActual = location
+
+                countDownTime = getLong("CountDownTime")
+                notified = getBoolean("Notified")
+            }
+            val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+            mapFragment.getMapAsync(this@MapsActivity)
+        }
+        else {
+            setUbicacion()
+        }
+
+        timer = object : CountDownTimer(countDownTime, 1000) {
+            override fun onTick(remainingTime: Long) {
+                countDownTime = remainingTime
+                Toast.makeText(this@MapsActivity, "Restante: ${remainingTime.toString()}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFinish() {
+                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=$clave")
+                Toast.makeText(this@MapsActivity, "Finalizó", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+
         locationRequest = LocationRequest.create().apply {
             interval = 4000
             fastestInterval = 2000
@@ -68,14 +107,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     return
                 }
                 for (location in locationResult.locations) {
-                    //Log.d("MapsActivity", "Location: ${location.toString()}")
-                    Toast.makeText(this@MapsActivity, "Location: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
+                    if (this@MapsActivity::mCircle.isInitialized) {
+                        val distancia = FloatArray(2)
+                        Location.distanceBetween(location.latitude, location.longitude, mCircle.center.latitude, mCircle.center.longitude, distancia)
+                        if (distancia[0] <= mCircle.radius) {
+                            //Dentro del rango
+                            if (!timerOn) {
+                                timerOn = true
+                                timer.start()
+                                if (!notified) {
+                                    notified = true
+                                    enviarNotificacion()
+                                }
+                            }
+                        }
+                        else {
+                            //Fuera del rango
+                            if (timerOn) {
+                                notified = false
+                                countDownTime = 600000
+                                timerOn = false
+                                timer.cancel()
+                            }
+                        }
+                    }
+
                 }
             }
         }
 
-        setUbicacion()
         settingsAndLocationUpdates()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.run {
+            putDouble("Latitud", ubicacionActual.latitude)
+            putDouble("Longitud", ubicacionActual.longitude)
+            putLong("CountDownTime", countDownTime)
+            putBoolean("Notified", notified)
+        }
     }
 
     private fun setUbicacion() {
@@ -100,20 +172,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val latLngOrigen = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
         val latLngDestino = LatLng(lat!!, long!!)
-        //val latLngDestino = LatLng(25.7422697, -100.3120796)
 
         mMap.addMarker(MarkerOptions().position(latLngOrigen).title("Ubicación actual"))
         mMap.addMarker(MarkerOptions().position(latLngDestino).title("Casilla"))
 
-        val mCircle = mMap.addCircle(CircleOptions().center(latLngDestino).radius(100.0).fillColor(0x44ff0000).strokeWidth(0F))
-        val distancia = FloatArray(2)
-        Location.distanceBetween(latLngOrigen.latitude, latLngOrigen.longitude, mCircle.center.latitude, mCircle.center.longitude, distancia)
-        if (distancia[0] > mCircle.radius) {
-            Toast.makeText(this, "Fuera, distancia del centro: ${distancia[0]}", Toast.LENGTH_SHORT).show()
-        }
-        else {
-            Toast.makeText(this, "Dentro, distancia del centro: ${distancia[0]}", Toast.LENGTH_SHORT).show()
-        }
+        mCircle = mMap.addCircle(CircleOptions().center(latLngDestino).radius(100.0).fillColor(0x44ff0000).strokeWidth(0F))
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngOrigen, 15F))
 
@@ -134,6 +197,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         stopLocationUpdates()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (timerOn) {
+            timerOn = false
+            timer.cancel()
+        }
     }
 
     private fun settingsAndLocationUpdates() {
@@ -242,5 +313,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         return poly
+    }
+
+    private fun enviarNotificacion() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(channelID, channelName, importance)
+
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+
+            val notification = NotificationCompat.Builder(this, channelID).also { notif ->
+                notif.setContentTitle("AppCasillas")
+                notif.setContentText("Has llegado a tu casilla")
+                notif.setSmallIcon(R.mipmap.ic_launcher)
+            }.build()
+
+            val notificationManager = NotificationManagerCompat.from(applicationContext)
+            notificationManager.notify(1, notification)
+        }
+    }
+
+    private fun registrarVoto(url: String) {
+        val stringRequest = StringRequest(com.android.volley.Request.Method.GET, url, { response ->
+
+        }, { error ->
+            Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
+        })
+
+        Volley.newRequestQueue(this).add(stringRequest)
     }
 }

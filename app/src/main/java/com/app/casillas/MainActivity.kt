@@ -18,8 +18,6 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var URL_READLOCATION : String
-
     var lat : Double? = null
     var long : Double? = null
     var clave : String? = null
@@ -41,7 +39,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun buscarCasilla() {
         clave = txtClave.text.toString()
-        URL_READLOCATION = "http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave"
         if (clave!!.isEmpty()) {
             txtClave.setError("Favor de llenar este campo")
         }
@@ -55,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             else {
-                abrirMapa()
+                abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
             }
         }
     }
@@ -66,19 +63,18 @@ class MainActivity : AppCompatActivity() {
         if (grantResults.isNotEmpty()) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Se requiere aceptar el permiso", Toast.LENGTH_SHORT).show()
-                //buscarCasilla()
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                abrirMapa()
+                abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
             }
         }
     }
 
-    private fun abrirMapa() {
+    private fun abrirMapa(url: String) {
         var claveEncontrada = false
 
-        val stringRequest = StringRequest(Request.Method.GET, URL_READLOCATION, { response ->
+        val stringRequest = StringRequest(Request.Method.GET, url, { response ->
 
             try {
                 if (response.isNotEmpty()) {
