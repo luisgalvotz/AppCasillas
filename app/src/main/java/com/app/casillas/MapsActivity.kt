@@ -89,7 +89,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             override fun onFinish() {
-                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=${clave}")
+                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=$clave")
                 Toast.makeText(this@MapsActivity, "Finalizó", Toast.LENGTH_SHORT).show()
             }
 
