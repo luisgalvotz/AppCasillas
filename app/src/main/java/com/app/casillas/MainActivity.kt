@@ -2,6 +2,7 @@ package com.app.casillas
 
 import android.Manifest
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -22,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     var long : Double? = null
     var clave : String? = null
 
+    private lateinit var sp : SharedPreferences
+
     private lateinit var btnIngresar : Button
     private lateinit var txtClave : EditText
 
@@ -30,6 +33,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         txtClave = findViewById<EditText>(R.id.texto_clave)
+
+        sp = getSharedPreferences("Login", MODE_PRIVATE)
+
+        if (sp.getBoolean("Logged", false)) {
+            clave = sp.getString("CVE", "")
+            solicitarPermisos()
+        }
 
         btnIngresar = findViewById<Button>(R.id.boton_ingresar)
         btnIngresar.setOnClickListener {
@@ -43,17 +53,21 @@ class MainActivity : AppCompatActivity() {
             txtClave.setError("Favor de llenar este campo")
         }
         else {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                    1
-                )
-            }
-            else {
-                abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
-            }
+            solicitarPermisos()
+        }
+    }
+
+    private fun solicitarPermisos() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                1
+            )
+        }
+        else {
+            abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
         }
     }
 
@@ -93,6 +107,9 @@ class MainActivity : AppCompatActivity() {
 
             } finally {
                 if (claveEncontrada) {
+                    sp.edit().putBoolean("Logged", true).apply()
+                    sp.edit().putString("CVE", clave).apply()
+
                     val intent = Intent(this, MapsActivity::class.java)
                     intent.putExtra("LAT", lat)
                     intent.putExtra("LONG", long)

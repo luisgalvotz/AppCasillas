@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -36,7 +38,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var clave : String? = null
     var notified : Boolean = false
     var timerOn : Boolean = false
-    var countDownTime : Long = 300000
+    var countDownTime : Long = 30000
 
     val channelID = "AppCasillas"
     val channelName = "AppCasillas"
@@ -51,6 +53,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var loadingDialog: LoadingDialog
 
+    private lateinit var sp : SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -59,6 +63,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         lat = bundle!!.getDouble("LAT")
         long = bundle.getDouble("LONG")
         clave = bundle.getString("CVE")
+
+        sp = getSharedPreferences("Login", MODE_PRIVATE)
 
         loadingDialog = LoadingDialog(this)
         loadingDialog.startLoadingDialog()
@@ -85,12 +91,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         timer = object : CountDownTimer(countDownTime, 1000) {
             override fun onTick(remainingTime: Long) {
                 countDownTime = remainingTime
-                Toast.makeText(this@MapsActivity, "Restante: ${remainingTime.toString()}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MapsActivity, "Se registrará su asistencia en ${remainingTime/1000} segundos", Toast.LENGTH_SHORT)
             }
 
             override fun onFinish() {
                 registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=$clave")
-                Toast.makeText(this@MapsActivity, "Finalizó", Toast.LENGTH_SHORT).show()
+
+                sp.edit().putBoolean("Logged", false).apply()
+                sp.edit().putString("CVE", "").apply()
+
+                val intent = Intent(this@MapsActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
 
         }
@@ -125,7 +137,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             //Fuera del rango
                             if (timerOn) {
                                 notified = false
-                                countDownTime = 300000
+                                countDownTime = 30000
                                 timerOn = false
                                 timer.cancel()
                             }
@@ -193,6 +205,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         mMap.isMyLocationEnabled = true
     }
+
+    override fun onBackPressed() { }
 
     override fun onStop() {
         super.onStop()
@@ -324,8 +338,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             manager.createNotificationChannel(channel)
 
             val notification = NotificationCompat.Builder(this, channelID).also { notif ->
-                notif.setContentTitle("AppCasillas")
-                notif.setContentText("Has llegado a tu casilla")
+                notif.setContentTitle("Has llegado a tu casilla")
+                notif.setContentText("No cerrar la aplicación")
                 notif.setSmallIcon(R.mipmap.ic_launcher)
             }.build()
 
