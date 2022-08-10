@@ -4,18 +4,18 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.Exception
+import java.sql.Connection
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     var clave : String? = null
 
     private lateinit var sp : SharedPreferences
+
+    private lateinit var connection: Connection
 
     private lateinit var btnIngresar : Button
     private lateinit var txtClave : EditText
@@ -43,7 +45,23 @@ class MainActivity : AppCompatActivity() {
 
         btnIngresar = findViewById<Button>(R.id.boton_ingresar)
         btnIngresar.setOnClickListener {
-            buscarCasilla()
+            //buscarCasilla()
+            val c = ConnectionSQL()
+            connection = c.connDb()
+
+            if (c != null) {
+                try {
+                    val sqlStatement = "SELECT * FROM casillas"
+                    val smt = connection.createStatement()
+                    val set = smt.executeQuery(sqlStatement)
+                    while (set.next()) {
+                        var res = set.getString(2)
+                    }
+                    connection.close()
+                } catch (e: Exception) {
+                    Log.e("Error: ", e.message!!)
+                }
+            }
         }
     }
 
