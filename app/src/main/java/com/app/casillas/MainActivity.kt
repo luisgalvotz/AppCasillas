@@ -45,23 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         btnIngresar = findViewById<Button>(R.id.boton_ingresar)
         btnIngresar.setOnClickListener {
-            //buscarCasilla()
-            val c = ConnectionSQL()
-            connection = c.connDb()
-
-            if (c != null) {
-                try {
-                    val sqlStatement = "SELECT * FROM casillas"
-                    val smt = connection.createStatement()
-                    val set = smt.executeQuery(sqlStatement)
-                    while (set.next()) {
-                        var res = set.getString(2)
-                    }
-                    connection.close()
-                } catch (e: Exception) {
-                    Log.e("Error: ", e.message!!)
-                }
-            }
+            buscarCasilla()
         }
     }
 
@@ -85,7 +69,8 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else {
-            abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
+            //abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
+            abrirMapaa()
         }
     }
 
@@ -98,7 +83,30 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
+                //abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
+                abrirMapaa()
+            }
+        }
+    }
+
+    private fun abrirMapaa() {
+        val c = ConnectionSQL()
+        connection = c.connDb()
+
+        if (c != null) {
+            try {
+                val sqlStatement = "SELECT * FROM usuarios WHERE CVE=$clave"
+                val smt = connection.createStatement()
+                val set = smt.executeQuery(sqlStatement)
+
+                while (set.next()) {
+                    var id = set.getString(1)
+                    var nom = set.getString(3)
+                }
+                connection.close()
+
+            } catch (e: Exception) {
+                Log.e("Error: ", e.message!!)
             }
         }
     }

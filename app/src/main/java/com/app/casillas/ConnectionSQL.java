@@ -14,7 +14,7 @@ public class ConnectionSQL {
 
     @SuppressLint("NewApi")
     public Connection connDb() {
-        String ip = "", port = "", db = "", username = "sa", password = "";
+        String ip = "192.168.1.244", port = "1433", db = "app_casillas", username = "sa", password = "Juanp123";
 
         StrictMode.ThreadPolicy a = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(a);
@@ -30,25 +30,5 @@ public class ConnectionSQL {
         }
 
         return con;
-    }
-
-    public void readLocation(String cve) {
-        ConnectionSQL c = new ConnectionSQL();
-        Connection connection = c.connDb();
-
-        if (c != null) {
-            try {
-                String sqlStatement = "SELECT * FROM casillas";
-                Statement smt = connection.createStatement();
-                ResultSet set = smt.executeQuery(sqlStatement);
-                while (set.next()) {
-
-                }
-                connection.close();
-            }
-            catch (Exception e) {
-                Log.e("Error: ", e.getMessage());
-            }
-        }
     }
 }
