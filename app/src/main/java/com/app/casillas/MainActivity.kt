@@ -69,8 +69,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else {
-            //abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
-            abrirMapaa()
+            abrirMapa()
         }
     }
 
@@ -83,53 +82,37 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                //abrirMapa("http://cursoswelearn.xyz/AppCasillas/readLocation.php?CVE=$clave")
-                abrirMapaa()
+                abrirMapa()
             }
         }
     }
 
-    private fun abrirMapaa() {
+    private fun abrirMapa() {
         val c = ConnectionSQL()
-        connection = c.connDb()
+        connection = c.connDb()!!
+
+        var claveEncontrada = false
 
         if (c != null) {
             try {
-                val sqlStatement = "SELECT * FROM usuarios WHERE CVE=$clave"
+                val sqlStatement = "SELECT LATITUD, LONGITUD FROM casillas c INNER JOIN usuarios u ON u.SECCION = c.ID WHERE u.CVE = '$clave'"
                 val smt = connection.createStatement()
                 val set = smt.executeQuery(sqlStatement)
 
                 while (set.next()) {
-                    var id = set.getString(1)
-                    var nom = set.getString(3)
+                    lat = set.getDouble(1)
+                    long = set.getDouble(2)
+                    claveEncontrada = true
                 }
+
+                if (!claveEncontrada) {
+                    txtClave.setError("Clave no encontrada")
+                }
+
                 connection.close()
 
             } catch (e: Exception) {
                 Log.e("Error: ", e.message!!)
-            }
-        }
-    }
-
-    private fun abrirMapa(url: String) {
-        var claveEncontrada = false
-
-        val stringRequest = StringRequest(Request.Method.GET, url, { response ->
-
-            try {
-                if (response.isNotEmpty()) {
-                    val jsonObject = JSONObject(response)
-                    lat = jsonObject.getDouble("lat")
-                    long = jsonObject.getDouble("long")
-
-                    claveEncontrada = true
-                }
-                else {
-                    txtClave.setError("Clave no encontrada")
-                }
-
-            } catch (e: Exception) {
-                Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
 
             } finally {
                 if (claveEncontrada) {
@@ -142,14 +125,7 @@ class MainActivity : AppCompatActivity() {
                     intent.putExtra("CVE", clave)
                     startActivityForResult(intent, 1)
                 }
-
             }
-
-        }, { error ->
-            Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
-        })
-
-        Volley.newRequestQueue(this).add(stringRequest)
+        }
     }
-
 }

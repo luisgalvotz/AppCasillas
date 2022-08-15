@@ -13,6 +13,7 @@ import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.os.*
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.model.*
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.sql.Connection
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -42,6 +44,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     val channelID = "AppCasillas"
     val channelName = "AppCasillas"
+
+    private lateinit var connection: Connection
 
     private lateinit var mMap: GoogleMap
     private lateinit var mCircle: Circle
@@ -95,14 +99,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             override fun onFinish() {
-                registrarVoto("http://cursoswelearn.xyz/AppCasillas/registerVote.php?CVE=$clave")
-
-                sp.edit().putBoolean("Logged", false).apply()
-                sp.edit().putString("CVE", "").apply()
-
-                val intent = Intent(this@MapsActivity, MainActivity::class.java)
-                startActivity(intent)
-                finish()
+                registrarVoto()
             }
 
         }
@@ -254,7 +251,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun obtenerDireccionUrl(origen: LatLng, destino: LatLng): String {
-        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyDWXNDTULZTRa4K5YCf7d0N-bCjPJL8H5I"
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyBbscMvKBUxGVxT-ZeRPY6pe-s9aGaAtdI"
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -348,13 +345,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun registrarVoto(url: String) {
-        val stringRequest = StringRequest(com.android.volley.Request.Method.GET, url, { response ->
+    private fun registrarVoto() {
+        val c = ConnectionSQL()
+        connection = c.connDb()!!
 
-        }, { error ->
-            Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
-        })
+        if (c != null) {
+            try {
+                val sqlStatement = "UPDATE usuarios SET VOTO = 1 WHERE CVE = '$clave'"
+                val smt = connection.createStatement()
+                smt.executeQuery(sqlStatement)
 
-        Volley.newRequestQueue(this).add(stringRequest)
+                connection.close()
+
+            } catch (e: java.lang.Exception) {
+                Log.e("Error: ", e.message!!)
+
+            } finally {
+                sp.edit().putBoolean("Logged", false).apply()
+                sp.edit().putString("CVE", "").apply()
+
+                val intent = Intent(this@MapsActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        }
     }
 }
