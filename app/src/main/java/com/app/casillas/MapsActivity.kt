@@ -249,7 +249,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun obtenerDireccionUrl(origen: LatLng, destino: LatLng): String {
-        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyCbZhQ0ACceaJe7kV3v9KYkVI04wh8whDA"
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origen.latitude},${origen.longitude}&destination=${destino.latitude},${destino.longitude}&key=AIzaSyBnDn4Ce3fairDzTKrLENI4_39_nq5bceM"
     }
 
     @SuppressLint("StaticFieldLeak")
