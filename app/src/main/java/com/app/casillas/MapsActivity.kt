@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -97,7 +99,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             override fun onFinish() {
-                registrarVoto()
+                registrarVoto("https://github.com/CarlDom92438-32/AppCasillasKotlin/registerVote.php?CVE=$clave")
+
+                sp.edit().putBoolean("Logged", false).apply()
+                sp.edit().putString("CVE", "").apply()
+
+                val intent = Intent(this@MapsActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
 
         }
@@ -343,7 +352,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun registrarVoto() {
+    private fun registrarVoto(url: String) {
+        val stringRequest = StringRequest(com.android.volley.Request.Method.GET, url, { response ->
+
+        }, { error ->
+            Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
+        })
+
+        Volley.newRequestQueue(this).add(stringRequest)
+    }
+
+    /*private fun registrarVoto() {
         val c = ConnectionSQL()
         connection = c.connDb()!!
 
@@ -367,5 +386,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 finish()
             }
         }
-    }
+    }*/
 }

@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else {
-            abrirMapa()
+            abrirMapa("https://github.com/CarlDom92438-32/AppCasillasKotlin/readLocation.php?CVE=$clave")
         }
     }
 
@@ -82,12 +82,52 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                abrirMapa()
+                abrirMapa("https://github.com/CarlDom92438-32/AppCasillasKotlin/readLocation.php?CVE=$clave")
             }
         }
     }
 
-    private fun abrirMapa() {
+    private fun abrirMapa(url: String) {
+        var claveEncontrada = false
+
+        val stringRequest = StringRequest(Request.Method.GET, url, { response ->
+
+            try {
+                if (response.isNotEmpty()) {
+                    val jsonObject = JSONObject(response)
+                    lat = jsonObject.getDouble("lat")
+                    long = jsonObject.getDouble("long")
+
+                    claveEncontrada = true
+                }
+                else {
+                    txtClave.setError("Clave no encontrada")
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
+
+            } finally {
+                if (claveEncontrada) {
+                    sp.edit().putBoolean("Logged", true).apply()
+                    sp.edit().putString("CVE", clave).apply()
+
+                    val intent = Intent(this, MapsActivity::class.java)
+                    intent.putExtra("LAT", lat)
+                    intent.putExtra("LONG", long)
+                    intent.putExtra("CVE", clave)
+                    startActivityForResult(intent, 1)
+                }
+
+            }
+
+        }, { error ->
+            Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
+        })
+
+        Volley.newRequestQueue(this).add(stringRequest)
+    }
+
+    /*private fun abrirMapa() {
         val c = ConnectionSQL()
         connection = c.connDb()!!
 
@@ -127,5 +167,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }*/
 }
