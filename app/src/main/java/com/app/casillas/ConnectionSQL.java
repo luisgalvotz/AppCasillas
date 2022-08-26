@@ -12,17 +12,13 @@ import java.sql.Statement;
 public class ConnectionSQL {
     Connection con;
 
-    @SuppressLint("NewApi")
     public Connection connDb() {
-        String ip = "192.168.1.244", port = "1433", db = "app_casillas", username = "sa", password = "Juanp123";
+        String url = "jdbc:mysql://162.241.62.141:3306/disenow5_db_Casillas";
+        String username = "disenow5_casilla", password = "cocodrilo1";
 
-        StrictMode.ThreadPolicy a = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(a);
-        String connectURL = null;
         try {
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            connectURL = "jdbc:jtds:sqlserver://" + ip + ":" + port + ";" + "databasename=" + db + ";user=" + username + ";" + "password=" + password + ";";
-            con = DriverManager.getConnection(connectURL);
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection(url, username, password);
 
         }
         catch (Exception e) {

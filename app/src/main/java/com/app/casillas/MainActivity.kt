@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else {
-            abrirMapa("https://github.com/CarlDom92438-32/AppCasillasKotlin/readLocation.php?CVE=$clave")
+            abrirMapa("https://conection387893.000webhostapp.com/readLocation.php?CVE=$clave")
         }
     }
 
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                abrirMapa("https://github.com/CarlDom92438-32/AppCasillasKotlin/readLocation.php?CVE=$clave")
+                abrirMapa("https://conection387893.000webhostapp.com/readLocation.php?CVE=$clave")
             }
         }
     }

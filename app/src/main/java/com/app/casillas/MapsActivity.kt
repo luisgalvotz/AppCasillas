@@ -99,7 +99,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             override fun onFinish() {
-                registrarVoto("https://github.com/CarlDom92438-32/AppCasillasKotlin/registerVote.php?CVE=$clave")
+                registrarVoto("https://conection387893.000webhostapp.com/registerVote.php?CVE=$clave")
 
                 sp.edit().putBoolean("Logged", false).apply()
                 sp.edit().putString("CVE", "").apply()
