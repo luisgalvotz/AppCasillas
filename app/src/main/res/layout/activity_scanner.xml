@@ -57,32 +57,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
-    <EditText
-        android:id="@+id/texto_clave"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:background="@drawable/edit_text_bg"
-        android:drawableLeft="@drawable/ic_baseline_contacts_24"
-        android:drawablePadding="10dp"
-        android:hint="Clave de elector"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias=".5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.3"
-        app:layout_constraintWidth_percent=".8" />
-
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/boton_scan"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_bg"
-        android:text="Buscar"
+        android:text="Scan"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -91,22 +71,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/constraintLayout"
         app:layout_constraintVertical_bias="0.45"
-        app:layout_constraintWidth_percent=".8" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/boton_activar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_bg"
-        android:text="Activar Casilla"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/boton_scan"
-        app:layout_constraintVertical_bias="0.85"
         app:layout_constraintWidth_percent=".8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

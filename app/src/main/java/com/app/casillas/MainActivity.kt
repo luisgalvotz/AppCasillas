@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -27,8 +26,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var connection: Connection
 
-    private lateinit var btnIngresar : Button
     private lateinit var txtClave : EditText
+    private lateinit var btnIngresar : Button
+    private lateinit var btnActivar : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,10 +43,21 @@ class MainActivity : AppCompatActivity() {
             solicitarPermisos()
         }
 
-        btnIngresar = findViewById<Button>(R.id.boton_ingresar)
+        btnActivar = findViewById<Button>(R.id.boton_activar)
+        btnActivar.setOnClickListener {
+            activarCasilla()
+        }
+
+        btnIngresar = findViewById<Button>(R.id.boton_scan)
         btnIngresar.setOnClickListener {
             buscarCasilla()
         }
+    }
+
+    private fun activarCasilla() {
+        val intent = Intent(this, ScannerActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun buscarCasilla() {
