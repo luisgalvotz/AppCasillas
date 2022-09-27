@@ -47,22 +47,42 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Encuentra Tu Casilla"
+        android:text="Activar Casilla"
         android:textColor="@color/white"
-        android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintVertical_bias="0"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView2"
+        app:layout_constraintVertical_bias="0" />
+
+    <EditText
+        android:id="@+id/texto_cve_encargado"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="@drawable/edit_text_bg"
+        android:drawableLeft="@drawable/ic_baseline_contacts_24"
+        android:drawablePadding="10dp"
+        android:hint="Clave de elector"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintWidth_percent=".8" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/boton_scan"
+        android:id="@+id/boton_busca"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/button_bg"
-        android:text="Scan"
+        android:text="Buscar"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -71,6 +91,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/constraintLayout"
         app:layout_constraintVertical_bias="0.45"
+        app:layout_constraintWidth_percent=".8" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/boton_codigo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_bg"
+        android:enabled="false"
+        android:text="Código QR"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/boton_activ"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/boton_busca"
+        app:layout_constraintVertical_bias="0.85"
+        app:layout_constraintWidth_percent=".8" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/boton_activ"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_bg"
+        android:enabled="false"
+        android:text="Activar"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/boton_busca"
+        app:layout_constraintVertical_bias="0.85"
         app:layout_constraintWidth_percent=".8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             activarCasilla()
         }
 
-        btnIngresar = findViewById<Button>(R.id.boton_scan)
+        btnIngresar = findViewById<Button>(R.id.boton_buscar)
         btnIngresar.setOnClickListener {
             buscarCasilla()
         }
