@@ -9,6 +9,8 @@ import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.zxing.integration.android.IntentIntegrator
+import com.google.zxing.integration.android.IntentResult
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -17,6 +19,7 @@ class ScannerActivity : AppCompatActivity() {
     var cve : String? = null
     var nombre : String? = null
     var seccion : Int? = null
+    var codigo : String? = null
 
     private lateinit var txtClave : EditText
     private lateinit var btnBuscar : Button
@@ -42,7 +45,7 @@ class ScannerActivity : AppCompatActivity() {
 
         btnCodigo = findViewById<Button>(R.id.boton_codigo)
         btnCodigo.setOnClickListener {
-            //funcion para escanear codigo
+            escanearCodigo()
         }
 
         btnActivar = findViewById<Button>(R.id.boton_activ)
@@ -62,6 +65,7 @@ class ScannerActivity : AppCompatActivity() {
                     cve = jsonObject.getString("cve")
                     nombre = jsonObject.getString("nombre")
                     seccion = jsonObject.getInt("seccion")
+                    //codigo = jsonObject.getString("codigo")
 
                     claveEncontrada = true
                 }
@@ -75,7 +79,7 @@ class ScannerActivity : AppCompatActivity() {
                     btnCodigo.isEnabled = true
                     btnActivar.isEnabled = true
 
-                    //DIALOG DE BIENVENIDA AL ENCARGADO
+                    //dialog de bienvenida al encargado
                 }
             }
 
@@ -86,16 +90,41 @@ class ScannerActivity : AppCompatActivity() {
         Volley.newRequestQueue(this).add(stringRequest)
     }
 
+    private fun escanearCodigo() {
+        val integrador = IntentIntegrator(this)
+        integrador.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+        integrador.setPrompt("Lector código QR")
+        integrador.setCameraId(0)
+        integrador.setBeepEnabled(true)
+        integrador.setBarcodeImageEnabled(true)
+        integrador.initiateScan()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+
+        if (result != null) {
+            if (result.contents == null) {
+                Toast.makeText(this, "Lectura cancelada", Toast.LENGTH_LONG).show()
+            }
+            else {
+                Toast.makeText(this, result.contents, Toast.LENGTH_LONG).show()
+                //se debe comparar el codigo escaneado (result.contents) con el codigo de la casilla (var codigo)
+            }
+        }
+        else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     private fun activarCasilla(url: String) {
         val stringRequest = StringRequest(Request.Method.GET, url, { response ->
 
             try {
-                //SE ACTIVARÁ LA CASILLA CORRECTA
+                //mostrar dialog de casilla activada
             } catch (e: Exception) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
             } finally {
-                //DIALOG DE CASILLA ACTIVADA
-
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
                 finish()
