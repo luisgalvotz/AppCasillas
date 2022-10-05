@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         else {
-            abrirMapa("https://conection387893.000webhostapp.com/readLocation.php?CVE=$clave")
+            abrirMapa("https://appcasillas.com/readLocation.php?CVE=$clave")
         }
     }
 
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
-                abrirMapa("https://conection387893.000webhostapp.com/readLocation.php?CVE=$clave")
+                abrirMapa("https://appcasillas.com/readLocation.php?CVE=$clave")
             }
         }
     }
@@ -109,7 +109,12 @@ class MainActivity : AppCompatActivity() {
                     lat = jsonObject.getDouble("lat")
                     long = jsonObject.getDouble("long")
 
-                    claveEncontrada = true
+                    if (lat!! != 0.0 && long!! != 0.0) {
+                        claveEncontrada = true
+                    }
+                    else {
+                        Toast.makeText(this, "Su casilla aún no ha sido activada", Toast.LENGTH_LONG).show()
+                    }
                 }
                 else {
                     txtClave.setError("Clave no encontrada")

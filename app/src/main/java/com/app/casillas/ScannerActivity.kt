@@ -3,6 +3,7 @@ package com.app.casillas
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -39,7 +40,7 @@ class ScannerActivity : AppCompatActivity() {
                 txtClave.setError("Favor de llenar este campo")
             }
             else {
-                loginEncargado("https://conection387893.000webhostapp.com/loginManager.php?CVE=$cve")
+                loginEncargado("https://appcasillas.com/loginManager.php?CVE=$cve")
             }
         }
 
@@ -50,7 +51,7 @@ class ScannerActivity : AppCompatActivity() {
 
         btnActivar = findViewById<Button>(R.id.boton_activ)
         btnActivar.setOnClickListener {
-            activarCasilla("https://conection387893.000webhostapp.com/activateSection.php?SECCION=$seccion")
+            activarCasilla("https://appcasillas.com/activateSection.php?SECCION=$seccion")
         }
     }
 
@@ -76,10 +77,10 @@ class ScannerActivity : AppCompatActivity() {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
             } finally {
                 if (claveEncontrada) {
-                    btnCodigo.isEnabled = true
-                    btnActivar.isEnabled = true
+                    btnCodigo.visibility = View.VISIBLE
+                    btnActivar.visibility = View.VISIBLE
 
-                    //dialog de bienvenida al encargado
+                    Toast.makeText(this, "Bienvenido $nombre", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -121,7 +122,7 @@ class ScannerActivity : AppCompatActivity() {
         val stringRequest = StringRequest(Request.Method.GET, url, { response ->
 
             try {
-                //mostrar dialog de casilla activada
+                Toast.makeText(this, "Gracias por activar la casilla $seccion", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
             } finally {
