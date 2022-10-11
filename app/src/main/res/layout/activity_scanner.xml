@@ -116,6 +116,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/button_bg"
         android:visibility="gone"
+        android:enabled="false"
         android:text="Activar"
         android:textColor="@color/white"
         android:textSize="16sp"

@@ -109,12 +109,7 @@ class MainActivity : AppCompatActivity() {
                     lat = jsonObject.getDouble("lat")
                     long = jsonObject.getDouble("long")
 
-                    if (lat!! != 0.0 && long!! != 0.0) {
-                        claveEncontrada = true
-                    }
-                    else {
-                        Toast.makeText(this, "Su casilla aún no ha sido activada", Toast.LENGTH_LONG).show()
-                    }
+                    claveEncontrada = true
                 }
                 else {
                     txtClave.setError("Clave no encontrada")
