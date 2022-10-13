@@ -122,7 +122,7 @@ class ScannerActivity : AppCompatActivity() {
                     btnCodigo.visibility = View.VISIBLE
                     btnActivar.visibility = View.VISIBLE
 
-                    setUbicacion()
+                    solicitarPermisos()
                     Toast.makeText(this, "Bienvenido $nombre", Toast.LENGTH_LONG).show()
                 }
             }
@@ -134,7 +134,7 @@ class ScannerActivity : AppCompatActivity() {
         Volley.newRequestQueue(this).add(stringRequest)
     }
 
-    private fun setUbicacion() {
+    private fun solicitarPermisos() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -142,6 +142,9 @@ class ScannerActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
                 1
             )
+        }
+        else {
+            setUbicacion()
         }
     }
 
@@ -153,23 +156,25 @@ class ScannerActivity : AppCompatActivity() {
                 Toast.makeText(this, "Se requiere aceptar el permiso", Toast.LENGTH_SHORT).show()
             }
             else {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return
-                }
-                val ultimaUbicacion = fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                ultimaUbicacion.addOnSuccessListener { ubicacion ->
-                    if (ubicacion != null) {
-                        ubicacionActual = ubicacion
+                setUbicacion()
+            }
+        }
+    }
 
-                        val geocoder = Geocoder(this, Locale.getDefault())
-                        Thread {
-                            val direcciones = geocoder.getFromLocation(ubicacionActual.latitude, ubicacionActual.longitude, 1)
-                            if (direcciones.size > 0) {
-                                ubicacionString = direcciones[0].getAddressLine(0)
-                            }
-                        }.start()
-                    }
+    private fun setUbicacion() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        val ultimaUbicacion = fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+        ultimaUbicacion.addOnSuccessListener { ubicacion ->
+            if (ubicacion != null) {
+                ubicacionActual = ubicacion
+
+                val geocoder = Geocoder(this, Locale.getDefault())
+                val direcciones = geocoder.getFromLocation(ubicacionActual.latitude, ubicacionActual.longitude, 1)
+                if (direcciones.size > 0) {
+                    ubicacionString = direcciones[0].getAddressLine(0)
                 }
             }
         }
@@ -180,7 +185,7 @@ class ScannerActivity : AppCompatActivity() {
         integrador.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
         integrador.setPrompt("Lector código QR")
         integrador.setCameraId(0)
-        integrador.setBeepEnabled(true)
+        integrador.setBeepEnabled(false)
         integrador.setBarcodeImageEnabled(true)
         integrador.initiateScan()
     }
@@ -193,8 +198,6 @@ class ScannerActivity : AppCompatActivity() {
                 Toast.makeText(this, "Lectura cancelada", Toast.LENGTH_LONG).show()
             }
             else {
-                Toast.makeText(this, result.contents, Toast.LENGTH_LONG).show()
-
                 codigoEscaneado = result.contents
                 validarActivacion("https://appcasillas.com/validActivation.php?SECCION=$seccion")
             }
@@ -212,13 +215,13 @@ class ScannerActivity : AppCompatActivity() {
             try {
                 if (response.isNotEmpty()) {
                     val jsonObject = JSONObject(response)
-                    //val codigo = jsonObject.getString("codigo")
+                    val codigo = jsonObject.getString("codigo")
                     val lat = jsonObject.getDouble("lat")
                     val long = jsonObject.getDouble("long")
 
                     val distancia = FloatArray(2)
                     Location.distanceBetween(ubicacionActual.latitude, ubicacionActual.longitude, lat, long, distancia)
-                    if (distancia[0] <= 100) { //aqui tambien se debe validar (codigo == codigoEscaneado)
+                    if (distancia[0] <= 100 && codigo == codigoEscaneado) {
                         activacionCorrecta = true
                     }
                     else {
