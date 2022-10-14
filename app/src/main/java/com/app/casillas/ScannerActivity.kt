@@ -19,9 +19,7 @@ import com.android.volley.toolbox.Volley
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.google.android.gms.maps.model.Circle
 import com.google.zxing.integration.android.IntentIntegrator
-import com.google.zxing.integration.android.IntentResult
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.*
@@ -29,7 +27,6 @@ import kotlin.collections.HashMap
 
 class ScannerActivity : AppCompatActivity() {
 
-    var cve : String? = null
     var nombre : String? = null
     var seccion : Int = 0
     var codigoEscaneado : String? = null
@@ -39,7 +36,7 @@ class ScannerActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationProviderClient : FusedLocationProviderClient
 
-    private lateinit var txtClave : EditText
+    private lateinit var txtNombre : EditText
     private lateinit var btnBuscar : Button
     private lateinit var btnCodigo : Button
     private lateinit var btnActivar : Button
@@ -48,18 +45,18 @@ class ScannerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scanner)
 
-        txtClave = findViewById<EditText>(R.id.texto_cve_encargado)
+        txtNombre = findViewById<EditText>(R.id.texto_nom_encargado)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         btnBuscar = findViewById<Button>(R.id.boton_busca)
         btnBuscar.setOnClickListener {
-            cve = txtClave.text.toString()
-            if (cve!!.isEmpty()) {
-                txtClave.setError("Favor de llenar este campo")
+            nombre = txtNombre.text.toString()
+            if (nombre!!.isEmpty()) {
+                txtNombre.setError("Favor de llenar este campo")
             }
             else {
-                loginEncargado("https://appcasillas.com/loginManager.php?CVE=$cve")
+                loginEncargado("https://appcasillas.com/loginManager.php?NOMBRE=$nombre")
             }
         }
 
@@ -106,14 +103,13 @@ class ScannerActivity : AppCompatActivity() {
             try {
                 if (response.isNotEmpty()) {
                     val jsonObject = JSONObject(response)
-                    cve = jsonObject.getString("cve")
                     nombre = jsonObject.getString("nombre")
                     seccion = jsonObject.getInt("seccion")
 
                     claveEncontrada = true
                 }
                 else {
-                    txtClave.setError("Clave no encontrada")
+                    txtNombre.setError("Nombre no encontrado")
                 }
             } catch (e: Exception) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()

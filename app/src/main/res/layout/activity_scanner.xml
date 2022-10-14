@@ -58,13 +58,13 @@
         app:layout_constraintVertical_bias="0" />
 
     <EditText
-        android:id="@+id/texto_cve_encargado"
+        android:id="@+id/texto_nom_encargado"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:background="@drawable/edit_text_bg"
         android:drawableLeft="@drawable/ic_baseline_contacts_24"
         android:drawablePadding="10dp"
-        android:hint="Clave de elector"
+        android:hint="Nombre"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
